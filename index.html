@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz de Conhecimentos Gerais</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(to right, #4facfe, #00f2fe);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      padding: 30px;
+      width: 90%;
+      max-width: 700px;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
+    .question {
+      font-size: 1.2rem;
+      margin: 20px 0;
+    }
+    .options button {
+      background-color: #2196F3;
+      color: white;
+      padding: 10px 20px;
+      margin: 10px 5px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .options button:hover {
+      background-color: #1976D2;
+    }
+    .score, .timer {
+      font-size: 1rem;
+      margin: 15px 0;
+    }
+    #restart {
+      display: none;
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    #restart:hover {
+      background-color: #388E3C;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Quiz de Conhecimentos Gerais</h1>
+    <div class="score" id="score"></div>
+    <div class="timer" id="timer">Tempo restante: <span id="time">15</span>s</div>
+    <div class="question" id="question"></div>
+    <div class="options" id="options"></div>
+    <div id="result"></div>
+    <button id="restart" onclick="restartQuiz()">Jogar Novamente</button>
+  </div>
+
+  <script>
+    const perguntas = [
+      { pergunta: "Qual é a capital do Brasil?", opcoes: ["São Paulo", "Rio de Janeiro", "Brasília", "Salvador", "Recife"], correta: 2 },
+      { pergunta: "Quem escreveu 'Dom Casmurro'?", opcoes: ["Machado de Assis", "Carlos Drummond", "Clarice Lispector", "Cecília Meireles", "Monteiro Lobato"], correta: 0 },
+      { pergunta: "Qual o maior planeta do Sistema Solar?", opcoes: ["Terra", "Saturno", "Júpiter", "Marte", "Vênus"], correta: 2 },
+      { pergunta: "Em que continente fica o Egito?", opcoes: ["Ásia", "Europa", "África", "América do Sul", "Oceania"], correta: 2 },
+      { pergunta: "Quantos lados tem um octógono?", opcoes: ["5", "6", "7", "8", "9"], correta: 3 },
+      { pergunta: "Quem foi o primeiro homem a pisar na Lua?", opcoes: ["Buzz Aldrin", "Neil Armstrong", "Yuri Gagarin", "Alan Shepard", "Michael Collins"], correta: 1 },
+      { pergunta: "Qual é o símbolo químico da água?", opcoes: ["O2", "H2", "CO2", "H2O", "NaCl"], correta: 3 },
+      { pergunta: "Em que ano ocorreu a Independência do Brasil?", opcoes: ["1808", "1822", "1889", "1500", "1815"], correta: 1 },
+      { pergunta: "Quem pintou a 'Mona Lisa'?", opcoes: ["Michelangelo", "Donatello", "Leonardo da Vinci", "Rafael", "Van Gogh"], correta: 2 },
+      { pergunta: "Qual é a moeda do Japão?", opcoes: ["Dólar", "Yen", "Euro", "Won", "Rúpia"], correta: 1 },
+      { pergunta: "Qual é o menor país do mundo?", opcoes: ["Mônaco", "San Marino", "Liechtenstein", "Vaticano", "Malta"], correta: 3 },
+      { pergunta: "Qual é o maior oceano do planeta?", opcoes: ["Atlântico", "Índico", "Ártico", "Pacífico", "Antártico"], correta: 3 },
+      { pergunta: "Qual é o plural de 'cidadão'?", opcoes: ["Cidadões", "Cidadãos", "Cidãos", "Cidadãns", "Cidadãs"], correta: 1 },
+      { pergunta: "Quem descobriu o Brasil?", opcoes: ["Pedro Álvares Cabral", "Dom Pedro I", "Vasco da Gama", "Cristóvão Colombo", "Américo Vespúcio"], correta: 0 },
+      { pergunta: "Quanto é 7 x 8?", opcoes: ["56", "54", "48", "60", "64"], correta: 0 },
+      { pergunta: "Em que continente fica o Brasil?", opcoes: ["América do Sul", "Europa", "Ásia", "África", "América Central"], correta: 0 },
+      { pergunta: "Qual animal é conhecido como 'Rei da Selva'?", opcoes: ["Leopardo", "Tigre", "Elefante", "Leão", "Guepardo"], correta: 3 },
+      { pergunta: "Qual é o nome do planeta vermelho?", opcoes: ["Vênus", "Terra", "Saturno", "Marte", "Mercúrio"], correta: 3 },
+      { pergunta: "Qual é o idioma falado na Austrália?", opcoes: ["Inglês", "Francês", "Alemão", "Italiano", "Mandarim"], correta: 0 },
+      { pergunta: "Qual o maior país em extensão territorial?", opcoes: ["Estados Unidos", "China", "Canadá", "Brasil", "Rússia"], correta: 4 },
+      { pergunta: "Onde aconteceu a Copa do Mundo de Futebol em 1994?", opcoes: ["França", "Chile", "Itália", "Estados Unidos", "África do Sul"], correta: 3 },
+      { pergunta: "Qual é a capital da Nova Zelândia?", opcoes: ["Auckland", "ChileChristchurch", "Wellington", "Hamilton", "Dunedin"], correta: 2 },
+      { pergunta: "Quem escreveu 'Dom Quixote'?", opcoes: ["William Shakespeare", "José de Alencar", "Miguel de Cervantes", "Fernando Pessoa", "Dante Alighieri"], correta: 2 }
+      { pergunta: "Em que ano ocorreu a Revolução Francesa'?", opcoes: ["1789", "1812", "1765", "1804", "1776"], correta: 0 },
+
+
+      // Adicione mais 30 questões para totalizar 50 se necessário
+    ];
+
+    let indice = 0;
+    let acertos = 0;
+    let tempo = 15;
+    let timerInterval;
+
+    function embaralhar(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    const perguntasEmbaralhadas = embaralhar([...perguntas]);
+
+    function mostrarPergunta() {
+      if (indice >= perguntasEmbaralhadas.length) {
+        mostrarResultado();
+        return;
+      }
+
+      tempo = 15;
+      document.getElementById("time").innerText = tempo;
+      document.getElementById("timer").style.display = "block";
+
+      const q = perguntasEmbaralhadas[indice];
+      document.getElementById("question").innerText = q.pergunta;
+      document.getElementById("options").innerHTML = "";
+
+      q.opcoes.forEach((opcao, i) => {
+        const btn = document.createElement("button");
+        btn.innerText = opcao;
+        btn.onclick = () => verificarResposta(i);
+        document.getElementById("options").appendChild(btn);
+      });
+
+      document.getElementById("score").innerText = `Questão ${indice + 1} de ${perguntasEmbaralhadas.length}`;
+
+      timerInterval = setInterval(() => {
+        tempo--;
+        document.getElementById("time").innerText = tempo;
+        if (tempo === 0) {
+          clearInterval(timerInterval);
+          mostrarCorreta();
+        }
+      }, 1000);
+    }
+
+    function verificarResposta(respostaSelecionada) {
+      clearInterval(timerInterval);
+      const correta = perguntasEmbaralhadas[indice].correta;
+      if (respostaSelecionada === correta) {
+        acertos++;
+      }
+      mostrarCorreta();
+    }
+
+    function mostrarCorreta() {
+      const correta = perguntasEmbaralhadas[indice].correta;
+      const botoes = document.getElementById("options").children;
+      for (let i = 0; i < botoes.length; i++) {
+        botoes[i].disabled = true;
+        if (i === correta) {
+          botoes[i].style.backgroundColor = "green";
+        } else {
+          botoes[i].style.backgroundColor = "red";
+        }
+      }
+      setTimeout(() => {
+        indice++;
+        mostrarPergunta();
+      }, 2000);
+    }
+
+    function mostrarResultado() {
+      document.getElementById("question").style.display = "none";
+      document.getElementById("options").style.display = "none";
+      document.getElementById("timer").style.display = "none";
+      document.getElementById("score").style.display = "none";
+      document.getElementById("result").innerHTML = `<h2>Você acertou ${acertos} de ${perguntasEmbaralhadas.length} perguntas (${((acertos / perguntasEmbaralhadas.length) * 100).toFixed(1)}%)</h2>`;
+      document.getElementById("restart").style.display = "inline-block";
+    }
+
+    function restartQuiz() {
+      location.reload();
+    }
+
+    mostrarPergunta();
+  </script>
+</body>
+</html>
